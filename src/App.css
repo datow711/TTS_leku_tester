@@ -121,11 +121,44 @@ button:disabled {
 }
 
 .history-item {
+  position: relative; /* Add this to position children */
   border: 1px solid #444;
-  padding: 1rem;
+  padding: 1rem 3rem 1rem 1rem; /* Adjusted padding: top, right, bottom, left */
   border-radius: 8px;
   background-color: #2a2a2a;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
 }
+
+.history-item:hover {
+  background-color: #3a3a3a;
+  border-color: #646cff;
+}
+
+.history-item:active {
+  background-color: #303030;
+  transform: scale(0.98);
+}
+
+.delete-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.2em 0.6em;
+  font-size: 0.8em;
+  background-color: #552222;
+  color: #ffcccc;
+  border: 1px solid #883333;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.delete-btn:hover {
+  background-color: #773333;
+  border-color: #ff6666;
+}
+
 
 .history-item p {
   margin: 0 0 0.5rem 0;

@@ -8,6 +8,7 @@ function App() {
   const [sentences, setSentences] = useState([]);
   const [loadingButton, setLoadingButton] = useState(null); // Can be 'hanji', 'lomaji', or null
   const [history, setHistory] = useState([]);
+  const [selectedHistoryId, setSelectedHistoryId] = useState(null);
 
   // State for the single selected sentence pair
   const [currentSentence, setCurrentSentence] = useState(null);
@@ -44,6 +45,7 @@ function App() {
       setCurrentSentence(sentences[randomIndex]);
       setHanjiCorrection('');
       setLomajiCorrection('');
+      setSelectedHistoryId(null); // Reset editing state
     }
   };
 
@@ -95,16 +97,34 @@ function App() {
       return;
     }
 
-    const { error } = await supabase
-      .from('tts_corrections')
-      .insert([
-        {
-          original_hanji: currentSentence.hanji,
-          original_lomaji: currentSentence.lomaji,
-          hanji_correction: hanjiCorrection,
-          lomaji_correction: lomajiCorrection,
-        }
-      ]);
+    let error;
+
+    if (selectedHistoryId) {
+      // Update existing record with only the correction fields
+      const updateData = {
+        hanji_correction: hanjiCorrection,
+        lomaji_correction: lomajiCorrection,
+      };
+      const { data, error: updateError } = await supabase
+        .from('tts_corrections')
+        .update(updateData)
+        .eq('id', selectedHistoryId);
+      
+      console.log('Supabase update response:', { data, error: updateError });
+      error = updateError;
+    } else {
+      // Insert new record with all fields
+      const insertData = {
+        original_hanji: currentSentence.hanji,
+        original_lomaji: currentSentence.lomaji,
+        hanji_correction: hanjiCorrection,
+        lomaji_correction: lomajiCorrection,
+      };
+      const { error: insertError } = await supabase
+        .from('tts_corrections')
+        .insert([insertData]);
+      error = insertError;
+    }
 
     if (error) {
       console.error('Error saving corrections:', error);
@@ -113,6 +133,7 @@ function App() {
       alert('儲存成功！');
       setHanjiCorrection('');
       setLomajiCorrection('');
+      setSelectedHistoryId(null); // Reset editing state
       fetchHistory(); // Refresh history
     }
   };
@@ -127,6 +148,34 @@ function App() {
       console.error('Error fetching history:', error);
     } else {
       setHistory(data);
+    }
+  };
+
+  const handleHistoryClick = (item) => {
+    setCurrentSentence({
+      hanji: item.original_hanji,
+      lomaji: item.original_lomaji,
+    });
+    setHanjiCorrection(item.hanji_correction || '');
+    setLomajiCorrection(item.lomaji_correction || '');
+    setSelectedHistoryId(item.id);
+  };
+
+  const deleteCorrection = async (id) => {
+    if (!window.confirm('確定要刪除這筆紀錄嗎？')) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('tts_corrections')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting correction:', error);
+      alert('刪除失敗');
+    } else {
+      fetchHistory(); // Refresh the list after successful deletion
     }
   };
 
@@ -193,8 +242,16 @@ function App() {
         <h3>修正紀錄</h3>
         <div className="history-list">
           {history.map((item) => (
-            <div key={item.id} className="history-item">
-              <p><strong>原句:</strong> {item.original_hanji}</p>
+            <div key={item.id} className="history-item" onClick={() => handleHistoryClick(item)}>
+                              <button 
+                                className="delete-btn" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteCorrection(item.id);
+                                }}
+                              >
+                                X
+                              </button>              <p><strong>原句:</strong> {item.original_hanji}</p>
               <p><strong>羅馬字:</strong> {item.original_lomaji}</p>
               <hr />
               {item.hanji_correction && <p><strong>漢字修正:</strong> {item.hanji_correction}</p>}
