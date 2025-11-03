@@ -19,6 +19,7 @@
   padding-left: 2rem;
   height: calc(100vh - 4rem);
   overflow-y: auto;
+  min-width: 0; /* <-- Allow sidebar to shrink */
 }
 
 .controls {
@@ -98,6 +99,7 @@ button:disabled {
 
 .history-item p {
   margin: 0 0 0.5rem 0;
+  word-break: break-word; /* <-- Force long text to wrap */
 }
 
 .history-item .timestamp {
