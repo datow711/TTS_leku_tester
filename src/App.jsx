@@ -56,15 +56,8 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tts_lang: 'tb', tts_data: currentSentence.lomaji }),
       });
-      const data = await response.json();
-      if (data.result) {
-        const binaryString = atob(data.result);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const audioBlob = new Blob([bytes], { type: 'audio/mp3' });
+      const audioBlob = await response.blob();
+      if (audioBlob.size > 0) {
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.play();
