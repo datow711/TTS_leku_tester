@@ -1,0 +1,34 @@
+##Request Header
+POST /backend/synthesize_speech HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: zh-TW,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+Connection: keep-alive
+Content-Length: 33
+Content-Type: application/json
+Host: dev.taigiedu.com
+Origin: https://datow711.github.io
+Referer: https://datow711.github.io/
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0
+sec-ch-ua: "Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+
+##Response Header
+HTTP/1.1 200 OK
+Date: Mon, 03 Nov 2025 12:33:45 GMT
+Server: Werkzeug/3.0.6 Python/3.8.20
+Content-Type: text/html; charset=utf-8
+Access-Control-Allow-Origin: https://datow711.github.io
+Vary: Origin,Accept-Encoding
+Content-Encoding: gzip
+Keep-Alive: timeout=5, max=98
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+
+
+##Payload
+{"tts_lang":"tb","tts_data":"a1"}

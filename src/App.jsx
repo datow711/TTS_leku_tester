@@ -47,14 +47,14 @@ function App() {
     }
   };
 
-  const playTTS = async () => {
-    if (!currentSentence) return;
+  const playTTS = async (textToSynthesize) => {
+    if (!textToSynthesize) return;
     setIsLoading(true);
     try {
       const response = await fetch('https://dev.taigiedu.com/backend/synthesize_speech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tts_lang: 'tb', tts_data: currentSentence.lomaji }),
+        body: JSON.stringify({ tts_lang: 'tb', tts_data: textToSynthesize }),
       });
       const rawBlob = await response.blob();
       // Explicitly set the MIME type to audio/wav based on API behavior
@@ -128,7 +128,7 @@ function App() {
                 <div className="sentence-display">
                   <p className="hanji">{currentSentence.hanji}</p>
                 </div>
-                <button onClick={playTTS} disabled={isLoading}>
+                <button onClick={() => playTTS(currentSentence.hanji)} disabled={isLoading}>
                   {isLoading ? '載入中...' : '播放'}
                 </button>
                 <textarea
@@ -149,7 +149,7 @@ function App() {
                 <div className="sentence-display">
                   <p className="lomaji">{currentSentence.lomaji}</p>
                 </div>
-                <button onClick={playTTS} disabled={isLoading}>
+                <button onClick={() => playTTS(currentSentence.lomaji)} disabled={isLoading}>
                   {isLoading ? '載入中...' : '播放'}
                 </button>
                 <textarea
