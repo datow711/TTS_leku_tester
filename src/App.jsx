@@ -12,7 +12,7 @@ function App() {
 
   useEffect(() => {
     // Fetch sentences from CSV
-    fetch('/leku_list.csv')
+    fetch(`${import.meta.env.BASE_URL}leku_list.csv`)
       .then(response => response.text())
       .then(csvText => {
         Papa.parse(csvText, {
