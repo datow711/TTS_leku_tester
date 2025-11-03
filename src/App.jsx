@@ -56,7 +56,9 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tts_lang: 'tb', tts_data: currentSentence.lomaji }),
       });
-      const audioBlob = await response.blob();
+      const rawBlob = await response.blob();
+      // Explicitly set the MIME type to audio/wav based on API behavior
+      const audioBlob = new Blob([rawBlob], { type: 'audio/wav' });
       if (audioBlob.size > 0) {
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
