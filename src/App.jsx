@@ -6,7 +6,7 @@ import './App.css';
 function App() {
   // Data and loading states
   const [sentences, setSentences] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingButton, setLoadingButton] = useState(null); // Can be 'hanji', 'lomaji', or null
   const [history, setHistory] = useState([]);
 
   // State for the single selected sentence pair
@@ -47,28 +47,45 @@ function App() {
     }
   };
 
-  const playTTS = async (textToSynthesize) => {
+  const playTTS = async (textToSynthesize, buttonId) => {
     if (!textToSynthesize) return;
-    setIsLoading(true);
+    setLoadingButton(buttonId);
     try {
       const response = await fetch('https://dev.taigiedu.com/backend/synthesize_speech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tts_lang: 'tb', tts_data: textToSynthesize }),
       });
-      const rawBlob = await response.blob();
-      // Explicitly set the MIME type to audio/wav based on API behavior
-      const audioBlob = new Blob([rawBlob], { type: 'audio/wav' });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const base64Audio = await response.text();
+      console.log('Raw base64 response:', base64Audio);
+
+      // Decode base64 string
+      const binaryString = atob(base64Audio);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      console.log('Decoded bytes:', bytes);
+
+      const audioBlob = new Blob([bytes], { type: 'audio/wav' });
       if (audioBlob.size > 0) {
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.play();
+      } else {
+        throw new Error('Received empty audio data after decoding.');
       }
     } catch (error) {
       console.error('Error fetching TTS:', error);
-      alert('語音合成失敗');
+      alert(`語音合成失敗: ${error.message}`);
     } finally {
-      setIsLoading(false);
+      setLoadingButton(null);
     }
   };
 
@@ -128,8 +145,8 @@ function App() {
                 <div className="sentence-display">
                   <p className="hanji">{currentSentence.hanji}</p>
                 </div>
-                <button onClick={() => playTTS(currentSentence.hanji)} disabled={isLoading}>
-                  {isLoading ? '載入中...' : '播放'}
+                <button onClick={() => playTTS(currentSentence.hanji, 'hanji')} disabled={loadingButton === 'hanji'}>
+                  {loadingButton === 'hanji' ? '載入中...' : '播放'}
                 </button>
                 <textarea
                   rows="4"
@@ -149,8 +166,8 @@ function App() {
                 <div className="sentence-display">
                   <p className="lomaji">{currentSentence.lomaji}</p>
                 </div>
-                <button onClick={() => playTTS(currentSentence.lomaji)} disabled={isLoading}>
-                  {isLoading ? '載入中...' : '播放'}
+                <button onClick={() => playTTS(currentSentence.lomaji, 'lomaji')} disabled={loadingButton === 'lomaji'}>
+                  {loadingButton === 'lomaji' ? '載入中...' : '播放'}
                 </button>
                 <textarea
                   rows="4"
