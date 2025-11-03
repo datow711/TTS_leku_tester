@@ -47,14 +47,14 @@ function App() {
     }
   };
 
-  const playTTS = async (textToSynthesize, buttonId) => {
+  const playTTS = async (textToSynthesize, buttonId, ttsLang) => {
     if (!textToSynthesize) return;
     setLoadingButton(buttonId);
     try {
       const response = await fetch('https://dev.taigiedu.com/backend/synthesize_speech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tts_lang: 'tb', tts_data: textToSynthesize }),
+        body: JSON.stringify({ tts_lang: ttsLang, tts_data: textToSynthesize }),
       });
 
       if (!response.ok) {
@@ -145,7 +145,7 @@ function App() {
                 <div className="sentence-display">
                   <p className="hanji">{currentSentence.hanji}</p>
                 </div>
-                <button onClick={() => playTTS(currentSentence.hanji, 'hanji')} disabled={loadingButton === 'hanji'}>
+                <button onClick={() => playTTS(currentSentence.hanji, 'hanji', 'tw')} disabled={loadingButton === 'hanji'}>
                   {loadingButton === 'hanji' ? '載入中...' : '播放'}
                 </button>
                 <textarea
@@ -166,7 +166,7 @@ function App() {
                 <div className="sentence-display">
                   <p className="lomaji">{currentSentence.lomaji}</p>
                 </div>
-                <button onClick={() => playTTS(currentSentence.lomaji, 'lomaji')} disabled={loadingButton === 'lomaji'}>
+                <button onClick={() => playTTS(currentSentence.lomaji, 'lomaji', 'tb')} disabled={loadingButton === 'lomaji'}>
                   {loadingButton === 'lomaji' ? '載入中...' : '播放'}
                 </button>
                 <textarea
