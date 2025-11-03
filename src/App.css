@@ -1,3 +1,4 @@
+/* Global Layout */
 .container {
   display: flex;
   gap: 2rem;
@@ -19,45 +20,60 @@
   padding-left: 2rem;
   height: calc(100vh - 4rem);
   overflow-y: auto;
-  min-width: 0; /* <-- Allow sidebar to shrink */
+  min-width: 0;
 }
 
-.controls {
+/* New Sentence Columns Layout */
+.sentence-columns-container {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
+  flex-grow: 1; /* Allows columns to fill available space */
 }
 
+.sentence-column {
+  flex: 1; /* Each column takes up 50% of the container */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #2a2a2a;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.sentence-column h3 {
+  margin-top: 0;
+  text-align: center;
+  color: #a0a0a0;
+}
+
+/* Shared Component Styles */
 .sentence-display {
-  padding: 1.5rem;
+  padding: 1rem;
   border: 1px solid #444;
   border-radius: 8px;
-  background-color: #2a2a2a;
+  background-color: #1e1e1e;
   text-align: left;
+  flex-grow: 1;
 }
 
 .hanji {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   margin: 0 0 0.5rem 0;
 }
 
 .lomaji {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   margin: 0;
   color: #ccc;
 }
 
-.correction-area {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
 textarea {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.8rem;
   border-radius: 8px;
   border: 1px solid #444;
-  background-color: #2a2a2a;
+  background-color: #1e1e1e;
   color: #fff;
   font-family: inherit;
   font-size: 1em;
@@ -84,6 +100,20 @@ button:disabled {
   border-color: #444;
 }
 
+.main-action-btn {
+  background-color: #646cff;
+  color: white;
+}
+.main-action-btn:disabled {
+  background-color: #494d88;
+  border-color: transparent;
+}
+.main-action-btn:hover:not(:disabled) {
+  background-color: #535bf2;
+}
+
+
+/* History List Styles */
 .history-list {
   display: flex;
   flex-direction: column;
@@ -99,7 +129,7 @@ button:disabled {
 
 .history-item p {
   margin: 0 0 0.5rem 0;
-  word-break: break-word; /* <-- Force long text to wrap */
+  word-break: break-word;
 }
 
 .history-item .timestamp {

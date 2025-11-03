@@ -4,14 +4,20 @@ import { supabase } from './supabaseClient';
 import './App.css';
 
 function App() {
+  // Data and loading states
   const [sentences, setSentences] = useState([]);
-  const [currentSentence, setCurrentSentence] = useState(null);
-  const [correction, setCorrection] = useState('');
-  const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [history, setHistory] = useState([]);
 
+  // State for the single selected sentence pair
+  const [currentSentence, setCurrentSentence] = useState(null);
+  
+  // States for the two correction inputs
+  const [hanjiCorrection, setHanjiCorrection] = useState('');
+  const [lomajiCorrection, setLomajiCorrection] = useState('');
+
+  // Initial data load
   useEffect(() => {
-    // Fetch sentences from CSV
     fetch(`${import.meta.env.BASE_URL}leku_list.csv`)
       .then(response => response.text())
       .then(csvText => {
@@ -27,28 +33,17 @@ function App() {
           }
         });
       });
-
-    // Fetch initial history from Supabase
     fetchHistory();
   }, []);
 
-  const fetchHistory = async () => {
-    const { data, error } = await supabase
-      .from('tts_corrections')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('Error fetching history:', error);
-    } else {
-      setHistory(data);
-    }
-  };
+  // --- Core Logic ---
 
   const getRandomSentence = () => {
     if (sentences.length > 0) {
       const randomIndex = Math.floor(Math.random() * sentences.length);
       setCurrentSentence(sentences[randomIndex]);
-      setCorrection('');
+      setHanjiCorrection('');
+      setLomajiCorrection('');
     }
   };
 
@@ -82,64 +77,116 @@ function App() {
     }
   };
 
-  const saveCorrection = async () => {
-    if (!currentSentence || !correction) {
-      alert('沒有原句或修正內容');
+  const saveCorrections = async () => {
+    if (!currentSentence) {
+      alert('請先抽選句子');
       return;
     }
+
     const { error } = await supabase
       .from('tts_corrections')
       .insert([
         {
-          hanji: currentSentence.hanji,
-          lomaji: currentSentence.lomaji,
-          correction: correction,
+          original_hanji: currentSentence.hanji,
+          original_lomaji: currentSentence.lomaji,
+          hanji_correction: hanjiCorrection,
+          lomaji_correction: lomajiCorrection,
         }
       ]);
 
     if (error) {
-      console.error('Error saving correction:', error);
+      console.error('Error saving corrections:', error);
       alert('儲存失敗');
     } else {
       alert('儲存成功！');
-      setCorrection('');
+      setHanjiCorrection('');
+      setLomajiCorrection('');
       fetchHistory(); // Refresh history
     }
   };
 
+  const fetchHistory = async () => {
+    const { data, error } = await supabase
+      .from('tts_corrections')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching history:', error);
+    } else {
+      setHistory(data);
+    }
+  };
+
+  // --- Render ---
   return (
     <div className="container">
       <div className="main-content">
-        <div className="controls">
-          <button onClick={getRandomSentence}>抽一句</button>
-          <button onClick={playTTS} disabled={!currentSentence || isLoading}>
-            {isLoading ? '載入中...' : '播放'}
-          </button>
-        </div>
-        {currentSentence && (
-          <div className="sentence-display">
-            <p className="hanji">{currentSentence.hanji}</p>
-            <p className="lomaji">{currentSentence.lomaji}</p>
+        <button onClick={getRandomSentence} className="main-action-btn">抽一句</button>
+
+        <div className="sentence-columns-container">
+          {/* Hanji Column */}
+          <div className="sentence-column">
+            <h3>漢字</h3>
+            {currentSentence && (
+              <>
+                <div className="sentence-display">
+                  <p className="hanji">{currentSentence.hanji}</p>
+                </div>
+                <button onClick={playTTS} disabled={isLoading}>
+                  {isLoading ? '載入中...' : '播放'}
+                </button>
+                <textarea
+                  rows="4"
+                  placeholder="請輸入漢字的修正..."
+                  value={hanjiCorrection}
+                  onChange={(e) => setHanjiCorrection(e.target.value)}
+                />
+              </>
+            )}
           </div>
-        )}
-        <div className="correction-area">
-          <textarea
-            rows="4"
-            placeholder="請輸入修正內容..."
-            value={correction}
-            onChange={(e) => setCorrection(e.target.value)}
-            disabled={!currentSentence}
-          />
-          <button onClick={saveCorrection} disabled={!currentSentence || !correction}>儲存</button>
+
+          {/* Lomaji Column */}
+          <div className="sentence-column">
+            <h3>羅馬字</h3>
+            {currentSentence && (
+              <>
+                <div className="sentence-display">
+                  <p className="lomaji">{currentSentence.lomaji}</p>
+                </div>
+                <button onClick={playTTS} disabled={isLoading}>
+                  {isLoading ? '載入中...' : '播放'}
+                </button>
+                <textarea
+                  rows="4"
+                  placeholder="請輸入羅馬字的修正..."
+                  value={lomajiCorrection}
+                  onChange={(e) => setLomajiCorrection(e.target.value)}
+                />
+              </>
+            )}
+          </div>
         </div>
+
+        <button 
+          onClick={saveCorrections} 
+          className="main-action-btn"
+          disabled={!currentSentence || (!hanjiCorrection && !lomajiCorrection)}
+        >
+          儲存修正
+        </button>
       </div>
+
       <div className="sidebar">
         <h3>修正紀錄</h3>
         <div className="history-list">
           {history.map((item) => (
             <div key={item.id} className="history-item">
-              <p><strong>原句:</strong> {item.hanji} ({item.lomaji})</p>
-              <p><strong>修正:</strong> {item.correction}</p>
+              <p><strong>原句:</strong> {item.original_hanji}</p>
+              <p><strong>羅馬字:</strong> {item.original_lomaji}</p>
+              <hr />
+              {item.hanji_correction && <p><strong>漢字修正:</strong> {item.hanji_correction}</p>}
+              {item.lomaji_correction && <p><strong>羅馬字修正:</strong> {item.lomaji_correction}</p>}
               <p className="timestamp">{new Date(item.created_at).toLocaleString()}</p>
             </div>
           ))}
