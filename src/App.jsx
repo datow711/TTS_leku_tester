@@ -91,6 +91,40 @@ function App() {
     }
   };
 
+  const playHTS = async (textToSynthesize, buttonId) => {
+    if (!textToSynthesize) return;
+    setLoadingButton(buttonId);
+    try {
+      const response = await fetch('/hts-api/HTS_taiwanese_synthesis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: 'tailuo',
+          chi_string: textToSynthesize,
+          hts_model: 'M12_5'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.audio_path_sandhi) {
+        const audioUrl = `http://140.116.245.147:30011/${result.audio_path_sandhi}`;
+        const audio = new Audio(audioUrl);
+        audio.play();
+      } else {
+        throw new Error('Audio path not found in API response.');
+      }
+    } catch (error) {
+      console.error('Error fetching HTS TTS:', error);
+      alert(`HTS 語音合成失敗: ${error.message}`);
+    } finally {
+      setLoadingButton(null);
+    }
+  };
+
   const saveCorrections = async () => {
     if (!currentSentence) {
       alert('請先抽選句子');
@@ -215,9 +249,14 @@ function App() {
                 <div className="sentence-display">
                   <p className="lomaji">{currentSentence.lomaji}</p>
                 </div>
-                <button onClick={() => playTTS(currentSentence.lomaji, 'lomaji', 'tb')} disabled={loadingButton === 'lomaji'}>
-                  {loadingButton === 'lomaji' ? '載入中...' : '播放'}
-                </button>
+                <div className="button-group">
+                  <button onClick={() => playTTS(currentSentence.lomaji, 'vits', 'tb')} disabled={loadingButton === 'vits'}>
+                    {loadingButton === 'vits' ? '載入中...' : 'VITS'}
+                  </button>
+                  <button onClick={() => playHTS(currentSentence.lomaji, 'hts')} disabled={loadingButton === 'hts'}>
+                    {loadingButton === 'hts' ? '載入中...' : 'HTS'}
+                  </button>
+                </div>
                 <textarea
                   rows="4"
                   placeholder="請輸入羅馬字的修正..."

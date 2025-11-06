@@ -46,6 +46,11 @@
   color: #a0a0a0;
 }
 
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
 /* Shared Component Styles */
 .sentence-display {
   padding: 1rem;

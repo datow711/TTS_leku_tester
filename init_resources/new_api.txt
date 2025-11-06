@@ -1,0 +1,40 @@
+Endpoint:http://140.116.245.147:30011/HTS_taiwanese_synthesis
+Method:POST
+
+#Request Header
+POST /HTS_taiwanese_synthesis HTTP/1.1
+Accept: application/json, text/javascript, */*; q=0.01
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-TW,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+Connection: keep-alive
+Content-Length: 68
+Content-Type: application/json
+Host: 140.116.245.147:30011
+Origin: http://140.116.245.147:30011
+Referer: http://140.116.245.147:30011/taiwanese_synthesis
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0
+X-Requested-With: XMLHttpRequest
+
+#Response Header
+HTTP/1.0 200 OK
+Content-Type: application/json
+Content-Length: 349
+Server: Werkzeug/2.0.3 Python/3.6.4
+Date: Thu, 06 Nov 2025 08:17:20 GMT
+
+#Payload
+{"language":"tailuo","chi_string":"目標字串","hts_model":"M12_5"}
+
+#Response
+{
+    "audio_path": "static/synthesis/minna/ori/111.243.210.210/tsh\u00ec-gi\u0101m_2025-11-06_16-17-18.wav",
+    "audio_path_sandhi": "static/synthesis/minna/sandhi/111.243.210.210/tsh\u00ec-gi\u0101m_2025-11-06_16-17-18.wav",
+    "chi_string": "tsh\u00ec-gi\u0101m",
+    "speaker": "M12_5",
+    "tai_luo_dict": "{}",
+    "tl_string": "tshi3-giam7",
+    "tl_string_sandhi": "tshi2 giam7 "
+}
+
+#解說
+我需要播放出audio_path_sandhi那個音檔
