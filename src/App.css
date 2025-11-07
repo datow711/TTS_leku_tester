@@ -1,4 +1,22 @@
 /* Global Layout */
+.top-buttons-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.top-buttons-container .main-action-btn {
+  flex: 9; /* 90% width */
+}
+
+.top-buttons-container .revert-btn {
+  flex: 1; /* 10% width */
+  background-color: #c33434;
+}
+
+.top-buttons-container .revert-btn:hover:not(:disabled) {
+  background-color: #b34747;
+}
+
 .container {
   display: flex;
   gap: 2rem;
@@ -87,15 +105,26 @@
   margin-top: 1rem; /* Space from the lomaji text */
 }
 
-.hanji {
+.hanji-editable {
   font-size: 1.5rem;
   margin: 0 0 0.5rem 0;
+  border: none;
+  background-color: transparent;
+  color: #fff;
+  padding: 0;
+  resize: none;
+  overflow: hidden;
 }
 
-.lomaji {
+.lomaji-editable {
   font-size: 1.2rem;
   margin: 0;
   color: #ccc;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  resize: none;
+  overflow: hidden;
 }
 
 textarea {

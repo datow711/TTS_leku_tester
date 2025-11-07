@@ -12,6 +12,8 @@ function App() {
 
   // State for the single selected sentence pair
   const [currentSentence, setCurrentSentence] = useState(null);
+  const [editableHanji, setEditableHanji] = useState('');
+  const [editableLomaji, setEditableLomaji] = useState('');
   
   // States for the two correction inputs
   const [hanjiCorrection, setHanjiCorrection] = useState('');
@@ -44,7 +46,10 @@ function App() {
   const getRandomSentence = () => {
     if (sentences.length > 0) {
       const randomIndex = Math.floor(Math.random() * sentences.length);
-      setCurrentSentence(sentences[randomIndex]);
+      const newSentence = sentences[randomIndex];
+      setCurrentSentence(newSentence);
+      setEditableHanji(newSentence.hanji);
+      setEditableLomaji(newSentence.lomaji);
       setHanjiCorrection('');
       setLomajiCorrection('');
       setHtsLomajiCorrection(''); // Clear HTS correction
@@ -204,7 +209,8 @@ function App() {
     setLomajiCorrection(item.lomaji_correction || '');
     setHtsLomajiCorrection(item.hts_lomaji_correction || ''); // Load HTS correction
     setHtsSandhiText(item.hts_sandhi_text || ''); // Load HTS sandhi text
-    setSelectedHistoryId(item.id);
+    setEditableHanji(item.original_hanji);
+    setEditableLomaji(item.original_lomaji);
   };
 
   const deleteCorrection = async (id) => {
@@ -229,7 +235,21 @@ function App() {
   return (
     <div className="container">
       <div className="main-content">
-        <button onClick={getRandomSentence} className="main-action-btn">抽一句</button>
+        <div className="top-buttons-container">
+          <button onClick={getRandomSentence} className="main-action-btn">抽一句</button>
+          <button 
+            onClick={() => {
+              if (currentSentence) {
+                setEditableHanji(currentSentence.hanji);
+                setEditableLomaji(currentSentence.lomaji);
+              }
+            }}
+            className="main-action-btn revert-btn"
+            disabled={!currentSentence || (editableHanji === currentSentence.hanji && editableLomaji === currentSentence.lomaji)}
+          >
+            還原原句
+          </button>
+        </div>
 
         <div className="sentence-columns-container">
           {/* Hanji Column */}
@@ -238,9 +258,14 @@ function App() {
             {currentSentence && (
               <>
                 <div className="sentence-display">
-                  <p className="hanji">{currentSentence.hanji}</p>
+                  <textarea
+                    className="hanji-editable"
+                    value={editableHanji}
+                    onChange={(e) => setEditableHanji(e.target.value)}
+                    rows="2"
+                  />
                 </div>
-                <button onClick={() => playTTS(currentSentence.hanji, 'hanji', 'tw')} disabled={loadingButton === 'hanji'}>
+                <button onClick={() => playTTS(editableHanji, 'hanji', 'tw')} disabled={loadingButton === 'hanji'}>
                   {loadingButton === 'hanji' ? '載入中...' : '播放'}
                 </button>
                 <textarea
@@ -259,14 +284,19 @@ function App() {
             {currentSentence && (
               <>
                 <div className="sentence-display">
-                  <p className="lomaji">{currentSentence.lomaji}</p>
+                  <textarea
+                    className="lomaji-editable"
+                    value={editableLomaji}
+                    onChange={(e) => setEditableLomaji(e.target.value)}
+                    rows="2"
+                  />
                   <p className="tl-string-sandhi">變調：{htsSandhiText}</p>
                 </div>
                 <div className="button-group">
-                  <button onClick={() => playTTS(currentSentence.lomaji, 'vits', 'tb')} disabled={loadingButton === 'vits'}>
+                  <button onClick={() => playTTS(editableLomaji, 'vits', 'tb')} disabled={loadingButton === 'vits'}>
                     {loadingButton === 'vits' ? '載入中...' : 'VITS'}
                   </button>
-                  <button onClick={() => playHTS(currentSentence.lomaji, 'hts')} disabled={loadingButton === 'hts'}>
+                  <button onClick={() => playHTS(editableLomaji, 'hts')} disabled={loadingButton === 'hts'}>
                     {loadingButton === 'hts' ? '載入中...' : 'HTS'}
                   </button>
                 </div>
@@ -292,7 +322,9 @@ function App() {
         <button 
           onClick={saveCorrections} 
           className="main-action-btn"
-          disabled={!currentSentence || (!hanjiCorrection && !lomajiCorrection && !htsLomajiCorrection)}
+          disabled={!currentSentence || 
+                    (editableHanji !== currentSentence.hanji || editableLomaji !== currentSentence.lomaji) ||
+                    (!hanjiCorrection && !lomajiCorrection && !htsLomajiCorrection)}
         >
           儲存修正
         </button>
