@@ -16,6 +16,7 @@ function App() {
   // States for the two correction inputs
   const [hanjiCorrection, setHanjiCorrection] = useState('');
   const [lomajiCorrection, setLomajiCorrection] = useState('');
+  const [htsSandhiText, setHtsSandhiText] = useState('');
 
   // Initial data load
   useEffect(() => {
@@ -46,6 +47,7 @@ function App() {
       setHanjiCorrection('');
       setLomajiCorrection('');
       setSelectedHistoryId(null); // Reset editing state
+      setHtsSandhiText(''); // Clear HTS sandhi text
     }
   };
 
@@ -114,6 +116,7 @@ function App() {
         const audioUrl = `http://140.116.245.147:30011/${result.audio_path_sandhi}`;
         const audio = new Audio(audioUrl);
         audio.play();
+        setHtsSandhiText(result.tl_string_sandhi || ''); // Set the sandhi text
       } else {
         throw new Error('Audio path not found in API response.');
       }
@@ -193,6 +196,7 @@ function App() {
     setHanjiCorrection(item.hanji_correction || '');
     setLomajiCorrection(item.lomaji_correction || '');
     setSelectedHistoryId(item.id);
+    setHtsSandhiText(''); // Clear HTS sandhi text
   };
 
   const deleteCorrection = async (id) => {
@@ -248,6 +252,7 @@ function App() {
               <>
                 <div className="sentence-display">
                   <p className="lomaji">{currentSentence.lomaji}</p>
+                  <p className="tl-string-sandhi">變調：{htsSandhiText}</p>
                 </div>
                 <div className="button-group">
                   <button onClick={() => playTTS(currentSentence.lomaji, 'vits', 'tb')} disabled={loadingButton === 'vits'}>
