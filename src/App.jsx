@@ -16,6 +16,7 @@ function App() {
   // States for the two correction inputs
   const [hanjiCorrection, setHanjiCorrection] = useState('');
   const [lomajiCorrection, setLomajiCorrection] = useState('');
+  const [htsLomajiCorrection, setHtsLomajiCorrection] = useState('');
   const [htsSandhiText, setHtsSandhiText] = useState('');
 
   // Initial data load
@@ -46,6 +47,7 @@ function App() {
       setCurrentSentence(sentences[randomIndex]);
       setHanjiCorrection('');
       setLomajiCorrection('');
+      setHtsLomajiCorrection(''); // Clear HTS correction
       setSelectedHistoryId(null); // Reset editing state
       setHtsSandhiText(''); // Clear HTS sandhi text
     }
@@ -141,6 +143,8 @@ function App() {
       const updateData = {
         hanji_correction: hanjiCorrection,
         lomaji_correction: lomajiCorrection,
+        hts_lomaji_correction: htsLomajiCorrection,
+        hts_sandhi_text: htsSandhiText,
       };
       const { data, error: updateError } = await supabase
         .from('tts_corrections')
@@ -156,6 +160,8 @@ function App() {
         original_lomaji: currentSentence.lomaji,
         hanji_correction: hanjiCorrection,
         lomaji_correction: lomajiCorrection,
+        hts_lomaji_correction: htsLomajiCorrection,
+        hts_sandhi_text: htsSandhiText,
       };
       const { error: insertError } = await supabase
         .from('tts_corrections')
@@ -170,6 +176,7 @@ function App() {
       alert('儲存成功！');
       setHanjiCorrection('');
       setLomajiCorrection('');
+      setHtsLomajiCorrection('');
       setSelectedHistoryId(null); // Reset editing state
       fetchHistory(); // Refresh history
     }
@@ -195,8 +202,9 @@ function App() {
     });
     setHanjiCorrection(item.hanji_correction || '');
     setLomajiCorrection(item.lomaji_correction || '');
+    setHtsLomajiCorrection(item.hts_lomaji_correction || ''); // Load HTS correction
+    setHtsSandhiText(item.hts_sandhi_text || ''); // Load HTS sandhi text
     setSelectedHistoryId(item.id);
-    setHtsSandhiText(''); // Clear HTS sandhi text
   };
 
   const deleteCorrection = async (id) => {
@@ -262,12 +270,20 @@ function App() {
                     {loadingButton === 'hts' ? '載入中...' : 'HTS'}
                   </button>
                 </div>
-                <textarea
-                  rows="4"
-                  placeholder="請輸入羅馬字的修正..."
-                  value={lomajiCorrection}
-                  onChange={(e) => setLomajiCorrection(e.target.value)}
-                />
+                <div className="correction-inputs-container">
+                  <textarea
+                    rows="4"
+                    placeholder="請輸入 VITS 羅馬字的修正..."
+                    value={lomajiCorrection}
+                    onChange={(e) => setLomajiCorrection(e.target.value)}
+                  />
+                  <textarea
+                    rows="4"
+                    placeholder="請輸入 HTS 羅馬字的修正..."
+                    value={htsLomajiCorrection}
+                    onChange={(e) => setHtsLomajiCorrection(e.target.value)}
+                  />
+                </div>
               </>
             )}
           </div>
@@ -276,7 +292,7 @@ function App() {
         <button 
           onClick={saveCorrections} 
           className="main-action-btn"
-          disabled={!currentSentence || (!hanjiCorrection && !lomajiCorrection)}
+          disabled={!currentSentence || (!hanjiCorrection && !lomajiCorrection && !htsLomajiCorrection)}
         >
           儲存修正
         </button>
@@ -299,7 +315,9 @@ function App() {
               <p><strong>羅馬字:</strong> {item.original_lomaji}</p>
               <hr />
               {item.hanji_correction && <p><strong>漢字修正:</strong> {item.hanji_correction}</p>}
-              {item.lomaji_correction && <p><strong>羅馬字修正:</strong> {item.lomaji_correction}</p>}
+              {item.lomaji_correction && <p><strong>VITS羅馬字修正:</strong> {item.lomaji_correction}</p>}
+              {item.hts_lomaji_correction && <p><strong>HTS羅馬字修正:</strong> {item.hts_lomaji_correction}</p>}
+              {item.hts_sandhi_text && <p><strong>HTS變調文字:</strong> {item.hts_sandhi_text}</p>}
               <p className="timestamp">{new Date(item.created_at).toLocaleString()}</p>
             </div>
           ))}
