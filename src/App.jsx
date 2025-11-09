@@ -104,7 +104,7 @@ function App() {
     if (!textToSynthesize) return;
     setLoadingButton(buttonId);
     try {
-      const response = await fetch('/hts-api/HTS_taiwanese_synthesis', {
+      const response = await fetch('http://140.116.245.147:30011/HTS_taiwanese_synthesis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
