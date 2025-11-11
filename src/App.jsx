@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx'; // 匯入 xlsx 套件
 import { supabase } from './supabaseClient';
 import './App.css';
 
@@ -231,6 +232,29 @@ function App() {
     }
   };
 
+  // --- 新增的匯出功能 ---
+  const exportToExcel = async () => {
+    const { data, error } = await supabase
+      .from('tts_corrections')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching data for export:', error);
+      alert('匯出失敗，無法讀取資料庫。');
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'TTS Corrections');
+      XLSX.writeFile(workbook, 'tts_corrections_export.xlsx');
+    } else {
+      alert('沒有可匯出的資料。');
+    }
+  };
+
   // --- Render ---
   return (
     <div className="container">
@@ -332,6 +356,9 @@ function App() {
 
       <div className="sidebar">
         <h3>修正紀錄</h3>
+        <button onClick={exportToExcel} className="main-action-btn" style={{ marginBottom: '10px' }}>
+          匯出 Excel
+        </button>
         <div className="history-list">
           {history.map((item) => (
             <div key={item.id} className="history-item" onClick={() => handleHistoryClick(item)}>
